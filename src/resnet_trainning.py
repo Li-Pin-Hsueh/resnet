@@ -1,20 +1,16 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 import argparse
 from resnet import ResNet18
 import os
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-
 
 # 定义是否使用GPU
-#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-#print('*******\nUsing device:', torch.cuda.get_device_name(device))
-device = torch.device('cpu')
-print('*******\n')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print('*******\nUsing device:', torch.cuda.get_device_name(device))
+
 
 # 参数设置,使得我们能够手动输入命令行参数，就是让风格变得和Linux命令行差不多
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
@@ -22,9 +18,10 @@ parser.add_argument('--outf', default='./model/', help='folder to output images 
 args = parser.parse_args()
 
 # 超参数设置
-EPOCH = 3 #135   #遍历数据集次数
+#EPOCH = 135   #遍历数据集次数
+EPOCH = 3
 pre_epoch = 0  # 定义已经遍历数据集的次数
-BATCH_SIZE = 64      #批处理尺寸(batch_size)
+BATCH_SIZE = 128      #批处理尺寸(batch_size)
 LR = 0.01        #学习率
 
 # 准备数据集并预处理
@@ -59,10 +56,8 @@ optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) 
 if __name__ == "__main__":
     if not os.path.exists(args.outf):
         os.makedirs(args.outf)
-
     best_acc = 85  #2 初始化best test accuracy
     print("Start Training, Resnet-18!")  # 定义遍历数据集的次数
-
     with open("acc.txt", "w") as f:
         with open("log.txt", "w")as f2:
             for epoch in range(pre_epoch, EPOCH):
@@ -73,19 +68,17 @@ if __name__ == "__main__":
                 total = 0.0
                 for i, data in enumerate(trainloader, 0):
                     # 准备数据
-
                     length = len(trainloader)
                     inputs, labels = data
                     inputs, labels = inputs.to(device), labels.to(device)
                     optimizer.zero_grad()
+
                     # forward + backward
                     outputs = net(inputs)
                     loss = criterion(outputs, labels)
                     loss.backward()
                     optimizer.step()
-                    if( i == 0 ):
-                        print("Input Size: ", len(inputs))
-                        print("Output Size: ", len(outputs))
+
                     # 每训练1个batch打印一次loss和准确率
                     sum_loss += loss.item()
                     _, predicted = torch.max(outputs.data, 1)
@@ -97,7 +90,7 @@ if __name__ == "__main__":
                           % (epoch + 1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total))
                     f2.write('\n')
                     f2.flush()
-
+                print()
                 # 每训练完一个epoch测试一下准确率
                 print("Waiting Test!")
                 with torch.no_grad():
@@ -112,7 +105,7 @@ if __name__ == "__main__":
                         _, predicted = torch.max(outputs.data, 1)
                         total += labels.size(0)
                         correct += (predicted == labels).sum()
-                    print('测试分类准确率为：%.3f%%' % (100 * correct / total))
+                    print('Test classfication accuracy:%.2f' % (100 * correct / total))
                     acc = 100. * correct / total
                     # 将每次测试结果实时写入acc.txt文件中
                     print('Saving model......')
