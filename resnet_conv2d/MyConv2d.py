@@ -67,7 +67,7 @@ class MyConv2d(nn.Module):
         ) + 1
 
 
-device = 'cpu'
+device = 'cuda'
 conv = MyConv2d(3, 1, 3, padding = 1, stride = 1)
 x = torch.randn(1, 3, 32, 32)
 out = conv(x)
