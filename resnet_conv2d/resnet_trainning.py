@@ -21,7 +21,7 @@ args = parser.parse_args()
 #EPOCH = 135   #遍历数据集次数
 EPOCH = 3
 pre_epoch = 0  # 定义已经遍历数据集的次数
-BATCH_SIZE = 1      #批处理尺寸(batch_size)
+BATCH_SIZE = 1     #批处理尺寸(batch_size)
 LR = 0.01        #学习率
 
 # 准备数据集并预处理
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
                     # forward + backward
                     outputs = net(inputs)
-                    loss = criterion(outputs, labels)
+                    loss = criterion(outputs, labels).to(device)
                     loss.backward()
                     optimizer.step()
 

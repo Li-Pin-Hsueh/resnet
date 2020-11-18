@@ -31,16 +31,17 @@ class MyConv2d(nn.Module):
         result = torch.zeros(
             [x.shape[0] * self.out_channels, width, height], dtype=torch.float32, device='cuda'
         )
-
+        shape = 0
         for channel in range(x.shape[1]):
             for i_convNumber in range(self.out_channels):
                 ## matmul for 2-dim and 1-dim
-                xx = torch.matmul(windows[channel], self.weights[i_convNumber][channel])
+                xx = torch.matmul(windows[channel], self.weights[i_convNumber][channel]).to('cuda')
                 xx = xx.view(-1, width, height)  # -1表不確定
+
                 result[i_convNumber * xx.shape[0] : (i_convNumber + 1) * xx.shape[0]] += xx
 
         result = result.view(x.shape[0], self.out_channels, width, height)
-
+        print("\nResult Shape: ", result.shape)
         return result
 
     def calculateWindows(self, x):
@@ -135,13 +136,21 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         out = self.conv1(x)
+        print("****Finish convolution layer1")
         out = self.layer1(out)
+        print("****Finish layer1")
         out = self.layer2(out)
+        print("****Finish layer2")
         out = self.layer3(out)
+        print("****Finish layer3")
         out = self.layer4(out)
+        print("****Finish layer4")
         out = F.avg_pool2d(out, 4)
+        print("****Finish avarage pool")
         out = out.view(out.size(0), -1)
+
         out = self.fc(out)
+        print("****Finish FC layer")
         return out
 
 
