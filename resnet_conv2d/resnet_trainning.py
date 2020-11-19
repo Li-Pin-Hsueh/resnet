@@ -1,3 +1,6 @@
+'''
+Resnet18 trainning with custom convolution layer
+'''
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -75,10 +78,13 @@ if __name__ == "__main__":
 
                     # forward + backward
                     outputs = net(inputs)
+                    print("ResNet forward completed.")
                     loss = criterion(outputs, labels).to(device)
+                    print("Criterion completed.")
                     loss.backward()
+                    print("Backward Propagation for loss completed.")
                     optimizer.step()
-
+                    
                     # 每训练1个batch打印一次loss和准确率
                     sum_loss += loss.item()                     # extracts the loss’s value as a Python float.
                     _, predicted = torch.max(outputs.data, 1)   # Returns the maximum value of all elements.

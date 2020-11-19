@@ -1,7 +1,5 @@
 '''ResNet-18 Image classfication for cifar-10 with PyTorch
-
-Author 'Sun-qian'.
-
+Using custom convolution layer
 '''
 import torch
 import torch.nn as nn
@@ -22,7 +20,7 @@ class MyConv2d(nn.Module):
         self.weights = nn.Parameter(torch.Tensor(self.out_channels, self.n_channels, self.kernal_size_number))
 
     def forward(self, x):
-        print("apply forward method")
+        #print("apply forward method")
         # 依據各項參數得出output feature map的尺寸
         width = self.calculateNewWidth(x)
         height = self.calculateNewHeight(x)
