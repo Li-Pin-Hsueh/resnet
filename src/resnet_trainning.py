@@ -10,7 +10,7 @@ import os
 # 定义是否使用GPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print('*******\nUsing device:', torch.cuda.get_device_name(device))
-
+#torch.backends.cudnn.deterministic = True
 
 # 参数设置,使得我们能够手动输入命令行参数，就是让风格变得和Linux命令行差不多
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
