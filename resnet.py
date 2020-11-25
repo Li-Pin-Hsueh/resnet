@@ -4,30 +4,8 @@ Using custom convolution layer
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Function
 from torch.nn.modules.module import Module
 from torch.nn.parameter import Parameter
-torch.backends.cudnn.deterministic = True
-'''
-Implement custom module
-'''
-class MyConv2d(Module):
-    def __init__(self, n_channels, out_channels, kernel_size, dilation=1, padding=0, stride=1):
-        super(MyConv2d, self).__init__()
-        self.kernel_size = (kernel_size, kernel_size)
-        self.out_channels = out_channels
-        self.dilation = (dilation, dilation)
-        self.padding = (padding, padding)
-        self.stride = (stride, stride)
-        self.n_channels = n_channels
-        self.weight = nn.Parameter(torch.randn(self.out_channels, self.n_channels, self.kernel_size[0], self.kernel_size[1]))
-
-
-    def forward(self, input):
-        # 呼叫 ScipyConv2dFunction 的 apply
-
-        return F.conv2d(input, self.weight, padding=self.padding, stride=self.stride)
-
 
 
 class ResidualBlock(nn.Module):
@@ -36,31 +14,20 @@ class ResidualBlock(nn.Module):
 
         self.left = nn.Sequential(
             #nn.Conv2d(inchannel, outchannel, kernel_size=3, stride=stride, padding=1, bias=False),
-            MyConv2d(inchannel, outchannel, kernel_size=3, stride=stride, padding=1),
+            nn.Conv2d(inchannel, outchannel, kernel_size=3, stride=stride, padding=1),
             nn.BatchNorm2d(outchannel),
             nn.ReLU(inplace=True),
             #nn.Conv2d(outchannel, outchannel, kernel_size=3, stride=1, padding=1, bias=False),
-            MyConv2d(outchannel, outchannel, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(outchannel, outchannel, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(outchannel)
         )
 
-        '''
-        ### my Implement
-        self.conv1 = MyConv2d(inchannel, outchannel, kernel_size=3, stride=stride, padding=1)
-        self.left = nn.Sequential(
-            nn.BatchNorm2d(outchannel),
-            nn.ReLU(inplace=True),
-            nn.BatchNorm2d(outchannel)
-        )
-        self.conv2 = MyConv2d(outchannel, outchannel, kernel_size=3, stride=1, padding=1)
-        self.BatchNorm2d = nn.BatchNorm2d(outchannel)
-        '''
         ###
         self.shortcut = nn.Sequential()
         if stride != 1 or inchannel != outchannel:
             self.shortcut = nn.Sequential(
                 #nn.Conv2d(inchannel, outchannel, kernel_size=1, stride=stride, bias=False),
-                MyConv2d(inchannel, outchannel, kernel_size=1, stride=stride),
+                nn.Conv2d(inchannel, outchannel, kernel_size=1, stride=stride),
                 nn.BatchNorm2d(outchannel)
             )
 
@@ -79,7 +46,7 @@ class ResNet(nn.Module):
         self.inchannel = 64
         self.conv1 = nn.Sequential(
             #nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False),
-            MyConv2d(3, 64, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
         )
