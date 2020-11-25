@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from torch.autograd import Function
 from torch.nn.modules.module import Module
 from torch.nn.parameter import Parameter
+torch.backends.cudnn.deterministic = True
 '''
 Implement custom module
 '''
@@ -24,6 +25,7 @@ class MyConv2d(Module):
 
     def forward(self, input):
         # 呼叫 ScipyConv2dFunction 的 apply
+
         return F.conv2d(input, self.weight, padding=self.padding, stride=self.stride)
 
 
@@ -97,21 +99,21 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         out = self.conv1(x)
-        print("****Finish convolution layer1")
+        #print("****Finish convolution layer1")
         out = self.layer1(out)
-        print("****Finish layer1")
+        #print("****Finish layer1")
         out = self.layer2(out)
-        print("****Finish layer2")
+        #print("****Finish layer2")
         out = self.layer3(out)
-        print("****Finish layer3")
+        #print("****Finish layer3")
         out = self.layer4(out)
-        print("****Finish layer4")
+        #print("****Finish layer4")
         out = F.avg_pool2d(out, 4)
-        print("****Finish avarage pool")
+        #print("****Finish avarage pool")
         out = out.view(out.size(0), -1)
 
         out = self.fc(out)
-        print("****Finish FC layer")
+        #print("****Finish FC layer")
         return out
 
 

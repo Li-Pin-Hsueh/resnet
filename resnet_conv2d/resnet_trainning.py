@@ -22,9 +22,9 @@ args = parser.parse_args()
 
 # 超参数设置
 #EPOCH = 135   #遍历数据集次数
-EPOCH = 3
+EPOCH = 135
 pre_epoch = 0  # 定义已经遍历数据集的次数
-BATCH_SIZE = 1     #批处理尺寸(batch_size)
+BATCH_SIZE = 64     #批处理尺寸(batch_size)
 LR = 0.01        #学习率
 
 # 准备数据集并预处理
@@ -78,13 +78,13 @@ if __name__ == "__main__":
 
                     # forward + backward
                     outputs = net(inputs)
-                    print("ResNet forward completed.")
+                    #print("ResNet forward completed.")
                     loss = criterion(outputs, labels).to(device)
-                    print("Criterion completed.")
+                    #print("Criterion completed.")
                     loss.backward()
-                    print("Backward Propagation for loss completed.")
+                    #print("Backward Propagation for loss completed.")
                     optimizer.step()
-                    
+
                     # 每训练1个batch打印一次loss和准确率
                     sum_loss += loss.item()                     # extracts the loss’s value as a Python float.
                     _, predicted = torch.max(outputs.data, 1)   # Returns the maximum value of all elements.
