@@ -6,25 +6,25 @@ input size: 3-dim Tensor
 filter: 4-dim Tensor
 '''
 def winograd_conv2d(input, filters):
-    H = input.shape[1]
-    W = input.shape[2]
-    ch = input.shape[0]     # in_channels
+    H = input.shape[2]
+    W = input.shape[3]
+    ch = input.shape[1]     # in_channels
     n = filters.shape[0]    # count of filters
-    output = torch.randn(n,H-2, W-2)
-    input_size = input.shape[1]
+    output = torch.zeros(input.shape[0],n,H-2, W-2)
+    input_size = input.shape[2]
+    for i in range( input.shape[0] ):
+        for row in range(0, H+1, 2):        ## stride = 2
+            for col in range(0, W+1, 2):
+                for ti in range(ch):
+                    for to in range(n):
+                        tile_y = torch.randn(2, 2)  # stride為2
+                        if( row + 3 < input_size and col + 3 < input_size ):
 
-    for row in range(0, H+1, 2):        ## stride = 2
-        for col in range(0, W+1, 2):
-            for ti in range(ch):
-                for to in range(n):
-                    tile_y = torch.randn(2, 2)  # stride為2
-                    if( row + 3 < input_size and col + 3 < input_size ):
-
-                        tile_z = get_tile(input, row, col, ti) # ti 為channel
-                        filter = filters[to][ti]    # which filter and its channel
-                        tile_y = winograd(tile_z, filter)
-                        # output中的row, col會剛好是tile_y要放的起點
-                        merge_output(output, tile_y, row, col, to)  # to是第幾個output (第0維)
+                            tile_z = get_tile(input[i], row, col, ti) # ti 為channel
+                            filter = filters[to][ti]    # which filter and its channel
+                            tile_y = winograd(tile_z, filter)
+                            # output中的row, col會剛好是tile_y要放的起點
+                            merge_output(output[i], tile_y, row, col, to)  # to是第幾個output (第0維)
 
     return output
 
@@ -82,8 +82,8 @@ def merge_output(output, tile_y, row, col, output_channel):
 
 
 
-input = torch.randn(3, 32, 32)
+input = torch.randn(5, 3, 32, 32)
 filters = torch.randn(8, 3, 3, 3)
 output = winograd_conv2d(input, filters)
 print(output.shape)
-print(output)
+#print(output)

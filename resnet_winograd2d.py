@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.modules.module import Module
 from torch.nn.parameter import Parameter
-from conv2d_model import MyConv2d
+from winograd_model import MyWinograd2d
 
 class ResidualBlock(nn.Module):
     def __init__(self, inchannel, outchannel, stride=1):
@@ -14,11 +14,11 @@ class ResidualBlock(nn.Module):
 
         self.left = nn.Sequential(
             #nn.Conv2d(inchannel, outchannel, kernel_size=3, stride=stride, padding=1, bias=False),
-            MyConv2d(inchannel, outchannel, kernel_size=3, stride=stride, padding=1),
+            MyWinograd2d(inchannel, outchannel, kernel_size=3, stride=stride, padding=1),
             nn.BatchNorm2d(outchannel),
             nn.ReLU(inplace=True),
             #nn.Conv2d(outchannel, outchannel, kernel_size=3, stride=1, padding=1, bias=False),
-            MyConv2d(outchannel, outchannel, kernel_size=3, stride=1, padding=1),
+            MyWinograd2d(outchannel, outchannel, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(outchannel)
         )
 
@@ -27,7 +27,7 @@ class ResidualBlock(nn.Module):
         if stride != 1 or inchannel != outchannel:
             self.shortcut = nn.Sequential(
                 #nn.Conv2d(inchannel, outchannel, kernel_size=1, stride=stride, bias=False),
-                MyConv2d(inchannel, outchannel, kernel_size=1, stride=stride),
+                MyWinograd2d(inchannel, outchannel, kernel_size=1, stride=stride),
                 nn.BatchNorm2d(outchannel)
             )
 
@@ -46,7 +46,7 @@ class ResNet(nn.Module):
         self.inchannel = 64
         self.conv1 = nn.Sequential(
             #nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False),
-            MyConv2d(3, 64, kernel_size=3, stride=1, padding=1),
+            MyWinograd2d(3, 64, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
         )
