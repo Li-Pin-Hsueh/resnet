@@ -124,7 +124,7 @@ class MyNet(nn.Module):
         self.conv1 = MyWinograd2d(inchannel, outchannel, kernel_size=3, padding=1)
         self.conv2 = MyWinograd2d(outchannel, outchannel, kernel_size=3, padding=1)
         self.conv3 = MyWinograd2d(outchannel, 64, kernel_size=3, padding=1)
-        self.bn = nn.BatchNorm2d(64)
+        #self.conv4 = MyWinograd2d(64, 64, kernel_size=3, padding=1)
 
     def forward(self, x):
         t1 = time.time()
@@ -144,23 +144,28 @@ class MyNet(nn.Module):
 
         print('Convolution Layer 3 Time Consumed: ' + str(round(t4-t3, 2)) + ' seconds')
         print("*********************")
-        out = self.bn(x)
+        '''
+        out = self.conv4(x)
+        t5 = time.time()
 
+        print('Convolution Layer 4 Time Consumed: ' + str(round(t5-t4, 2)) + ' seconds')
+        print("*********************")
         #out = F.relu(out)
-        return out
+        '''
+        return x
 
 #net = MyConv2d(3, 3, 3, padding=1)
 net = MyNet(3, 4)#.to('cuda')
-x = torch.randn(1, 3, 32, 32)#.to('cuda')
+x = torch.randn(2, 3, 32, 32)#.to('cuda')
 
 
 
-t5 = time.time()
+ts = time.time()
 out = net(x)
-t6 = time.time()
+tf = time.time()
 print("\nInput Size: ", x.shape)
 
 print("\nOutput Size: ", out.shape)
 #print(out[0][0])
-print('\nTotal Time Consumed: ' + str(round(t6-t5, 2)) + ' seconds')
+print('\nTotal Time Consumed: ' + str(round(tf-ts, 2)) + ' seconds')
 #print(out)
