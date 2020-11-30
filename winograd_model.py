@@ -8,10 +8,10 @@ class MyWinograd2d(nn.modules.Conv2d):
 
     def forward(self, input):
 
-
+        self.weight = nn.Parameter(torch.ones_like(self.weight))
         #print("result size: ", result.shape)
         # Padding
-        input = F.pad(input, (self.padding[0], self.padding[0], self.padding[1], self.padding[1]))#.to('cuda')
+        input = F.pad(input, (self.padding[0], self.padding[0], self.padding[1], self.padding[1]), value = 1)#.to('cuda')
 
         #print(input.shape)
         #print(result.shape)
@@ -101,10 +101,10 @@ class MyWinograd2d(nn.modules.Conv2d):
         '''
         output : 4-dim
         '''
-        output[output_channel][row][col] = tile_y[0][0]
-        output[output_channel][row][col+1] = tile_y[0][1]
-        output[output_channel][row+1][col] = tile_y[1][0]
-        output[output_channel][row+1][col+1] = tile_y[1][1]
+        output[output_channel][row][col] += tile_y[0][0]
+        output[output_channel][row][col+1] += tile_y[0][1]
+        output[output_channel][row+1][col] += tile_y[1][0]
+        output[output_channel][row+1][col+1] += tile_y[1][1]
 
 
 
@@ -154,9 +154,9 @@ class MyNet(nn.Module):
         '''
         return x
 
-#net = MyConv2d(3, 3, 3, padding=1)
+#net = MyWinograd2d(3, 3, 3, padding=1)
 net = MyNet(3, 4)#.to('cuda')
-x = torch.randn(2, 3, 32, 32)#.to('cuda')
+x = torch.ones(1, 3, 32, 32)#.to('cuda')
 
 
 
@@ -168,4 +168,4 @@ print("\nInput Size: ", x.shape)
 print("\nOutput Size: ", out.shape)
 #print(out[0][0])
 print('\nTotal Time Consumed: ' + str(round(tf-ts, 2)) + ' seconds')
-#print(out)
+print(out[0][0])

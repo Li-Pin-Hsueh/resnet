@@ -1,11 +1,16 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 import time
 class MyConv2d(nn.modules.Conv2d):
 
 
     def forward(self, input):
+        # Specific weights
+        self.weight = nn.Parameter(torch.ones_like(self.weight))
+
+
 
         # Calculate result size
         width = self.calculateNewWidth(input)
@@ -13,11 +18,11 @@ class MyConv2d(nn.modules.Conv2d):
 
         # Create Result Tensor
         result = torch.zeros(
-            [input.shape[0] , self.out_channels, width, height], dtype=torch.float32, device='cuda'
+            [input.shape[0] , self.out_channels, width, height], dtype=torch.float32#, device='cpu'
         )
         #print("result size: ", result.shape)
         # Padding
-        input = F.pad(input, (self.padding[0], self.padding[0], self.padding[1], self.padding[1])).to('cuda')
+        input = F.pad(input, (self.padding[0], self.padding[0], self.padding[1], self.padding[1]), value=1)#.to('cuda')
 
         #print(input.shape)
         #print(result.shape)
@@ -45,21 +50,26 @@ class MyConv2d(nn.modules.Conv2d):
 
                         r = rr*self.stride[1] ; c = rc*self.stride[0]
 
-                        for ch in range(self.in_channels):
+                        for ch in range(CH):
                             result[n1][n2][rr][rc] += \
                             input[n1][ch][r][c]*self.weight[n2][ch][0][0] + input[n1][ch][r][c+1]*self.weight[n2][ch][0][1] + input[n1][ch][r][c+2]*self.weight[n2][ch][0][2] + \
                             input[n1][ch][r+1][c]*self.weight[n2][ch][1][0] + input[n1][ch][r+1][c+1]*self.weight[n2][ch][1][1] + input[n1][ch][r+1][c+2]*self.weight[n2][ch][1][2] + \
                             input[n1][ch][r+2][c]*self.weight[n2][ch][2][0] + input[n1][ch][r+2][c+1]*self.weight[n2][ch][2][1] + input[n1][ch][r+2][c+2]*self.weight[n2][ch][2][2]
-        ''' Conputation v2
+
+
+        '''
+        r1 = -1 ; r2 = -1
         for n in range(N):
             for row in range(0, H+1, self.stride[0]):
+                r1 += 1 ; r2 = -1
                 for col in range(0, W+1, self.stride[1]):
+                    r2 += 1
                     for ch in range(CH):
                         for i in range(C):
                             for fr in range(FR):
                                 for fc in range(FC):
-                                    if( row+fr < H and col+fc < W):
-                                        result[n][i][fr][fc] +=     \
+                                    if( row+fr < H and col+fc < W and r1 < result.shape[2] and r2 < result.shape[3]):
+                                        result[n][i][r1][r2] +=     \
                                         self.weight[i][ch][fr][fc] * \
                                         input[n][ch][row+fr][col+fc]
         '''
@@ -81,6 +91,8 @@ class MyConv2d(nn.modules.Conv2d):
             (input.shape[3] + 2 * self.padding[1] - self.dilation[1] * (self.kernel_size[1] - 1) - 1)
             // self.stride[1]
         ) + 1
+
+
 
 class MyNet(nn.Module):
 
@@ -116,10 +128,10 @@ class MyNet(nn.Module):
 
         #out = F.relu(out)
         return out
-'''
+
 #net = MyConv2d(3, 3, 3, padding=1)
-net = MyNet(3, 4).to('cuda')
-x = torch.randn(1, 3, 32, 32).to('cuda')
+net = MyNet(3, 4)#.to('cuda')
+x = torch.ones(1, 3, 32, 32)#.to('cuda')
 
 
 t5 = time.time()
@@ -128,5 +140,4 @@ t6 = time.time()
 print("\nInput Size: ", x.shape)
 print("\nOutput Size: ", out.shape)
 print('\nTotal Time Consumed: ' + str(round(t6-t5, 2)) + ' seconds')
-#print(out)
-'''
+print(out[0][0])
