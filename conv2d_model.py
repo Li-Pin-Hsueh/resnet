@@ -38,6 +38,19 @@ class MyConv2d(nn.modules.Conv2d):
         FR = self.weight.shape[2]
         FC = self.weight.shape[3]
 
+        for n1 in range(N):
+            for n2 in range(self.out_channels):
+                for rr in range(result.shape[2]):
+                    for rc in range(result.shape[3]):
+
+                        r = rr*self.stride[1] ; c = rc*self.stride[0]
+
+                        for ch in range(self.in_channels):
+                            result[n1][n2][rr][rc] += \
+                            input[n1][ch][r][c]*self.weight[n2][ch][0][0] + input[n1][ch][r][c+1]*self.weight[n2][ch][0][1] + input[n1][ch][r][c+2]*self.weight[n2][ch][0][2] + \
+                            input[n1][ch][r+1][c]*self.weight[n2][ch][1][0] + input[n1][ch][r+1][c+1]*self.weight[n2][ch][1][1] + input[n1][ch][r+1][c+2]*self.weight[n2][ch][1][2] + \
+                            input[n1][ch][r+2][c]*self.weight[n2][ch][2][0] + input[n1][ch][r+2][c+1]*self.weight[n2][ch][2][1] + input[n1][ch][r+2][c+2]*self.weight[n2][ch][2][2]
+        ''' Conputation v2
         for n in range(N):
             for row in range(0, H+1, self.stride[0]):
                 for col in range(0, W+1, self.stride[1]):
@@ -49,7 +62,7 @@ class MyConv2d(nn.modules.Conv2d):
                                         result[n][i][fr][fc] +=     \
                                         self.weight[i][ch][fr][fc] * \
                                         input[n][ch][row+fr][col+fc]
-
+        '''
 
 
         #print("Finished Conv2d Computation")
@@ -103,7 +116,7 @@ class MyNet(nn.Module):
 
         #out = F.relu(out)
         return out
-
+'''
 #net = MyConv2d(3, 3, 3, padding=1)
 net = MyNet(3, 4).to('cuda')
 x = torch.randn(1, 3, 32, 32).to('cuda')
@@ -116,3 +129,4 @@ print("\nInput Size: ", x.shape)
 print("\nOutput Size: ", out.shape)
 print('\nTotal Time Consumed: ' + str(round(t6-t5, 2)) + ' seconds')
 #print(out)
+'''
